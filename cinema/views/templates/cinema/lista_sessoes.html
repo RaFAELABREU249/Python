@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block title %}Cinema{% endblock %}
+
+{% block content %}
+<h1>Programação do Cinema</h1>
+<p><a class="btn" href="{{ url_for('cinema.cadastrar_sessao') }}">+ Nova sessão</a></p>
+
+{% if sessoes %}
+<table>
+    <thead>
+        <tr>
+            <th>Filme</th>
+            <th>Sala</th>
+            <th>Data/hora</th>
+            <th>Preço</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sessao in sessoes %}
+        <tr>
+            <td>{{ sessao.filme.titulo }}</td>
+            <td>{{ sessao.sala.numero }}</td>
+            <td>{{ sessao.data_hora }}</td>
+            <td>R$ {{ sessao.preco }}</td>
+            <td>
+                <a href="{{ url_for('cinema.editar_sessao', sessao_id=sessao.id) }}">Editar</a>
+                <form method="POST" action="{{ url_for('cinema.deletar_sessao', sessao_id=sessao.id) }}" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta sessão?')">Deletar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhuma sessão cadastrada.</p>
+{% endif %}
+{% endblock %}

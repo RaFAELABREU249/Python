@@ -1,0 +1,21 @@
+from . import db
+from .modeloBase import ModeloBase
+
+
+class Sessao(ModeloBase):
+    __tablename__ = "sessoes"
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    data_hora = db.Column(db.DateTime, nullable=False)
+    preco = db.Column(db.Float, nullable=False)
+
+    filme_id = db.Column(db.Integer, db.ForeignKey('filmes.id'), nullable=False)
+    sala_id = db.Column(db.Integer, db.ForeignKey('salas.id'), nullable=False)
+
+    filme = db.relationship('Filme', back_populates='sessao')
+    sala = db.relationship('Sala', back_populates='sessao')
+    ingressos = db.relationship('Ingresso', back_populates='sessao')
+
+    @classmethod
+    def listar_com_detalhes(cls):
+        return cls.query.order_by(cls.data_hora.desc()).all()
