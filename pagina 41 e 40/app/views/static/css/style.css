@@ -1,0 +1,42 @@
+:root {
+    color-scheme: normal;
+    --bg: #f8f9fa;
+    --fg: #212529;
+    --card: #ffffff;
+    --nav: #0d6efd;
+    --btn-border: rgba(255,255,255,0.15);
+}
+html[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #121212;
+    --fg: #e9ecef;
+    --card: #1f1f1f;
+    --nav: #0b5ed7;
+    --btn-border: rgba(255,255,255,0.2);
+}
+body {
+    background: var(--bg);
+    color: var(--fg);
+}
+.navbar, .card {
+    background: var(--card) !important;
+}
+.navbar {
+    background: var(--nav) !important;
+}
+.btn-outline-light {
+    border-color: var(--btn-border);
+}
+.card {
+    border: none;
+}
+textarea.form-control, input.form-control, select.form-select {
+    background: var(--bg);
+    color: var(--fg);
+}
+.alert {
+    background: rgba(255,255,255,0.85);
+}
+html[data-theme='dark'] .alert {
+    background: rgba(33,37,41,0.9);
+}

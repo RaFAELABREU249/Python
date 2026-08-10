@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Controle de Tarefas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="bi bi-speedometer2"></i> Painel de Tarefas</h2>
+        <p class="text-muted">"{{ advice }}"</p>
+    </div>
+    <div>
+        <a href="{{ url_for('tasks.nova_tarefa') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nova tarefa</a>
+    </div>
+</div>
+<div class="mb-3">
+    <label class="form-label">Filtrar por status</label>
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ status|title if status != 'todos' else 'Todos' }}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+            <li><a class="dropdown-item filter-status" href="#" data-status="todos">Todos</a></li>
+            {% for option in status_options %}
+            <li><a class="dropdown-item filter-status" href="#" data-status="{{ option }}">{{ option.title() }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div id="tarefas-lista" class="row gy-3">
+    {% for tarefa in tarefas %}
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title"><i class="bi bi-card-checklist"></i> {{ tarefa.titulo }}</h5>
+                    <span class="badge bg-{{ 'warning' if tarefa.status == 'pendente' else 'info' if tarefa.status == 'em andamento' else 'success' }}">{{ tarefa.status.title() }}</span>
+                </div>
+                <p class="card-text">{{ tarefa.descricao }}</p>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a href="{{ url_for('tasks.editar', id=tarefa.id) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-square"></i> Editar</a>
+                        <form method="post" action="{{ url_for('tasks.excluir', id=tarefa.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Excluir</button>
+                        </form>
+                    </div>
+                    <span class="text-muted">ID {{ tarefa.id }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-secondary">Nenhuma tarefa encontrada para o filtro selecionado.</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const filterButtons = document.querySelectorAll('.filter-status');
+const tarefasLista = document.getElementById('tarefas-lista');
+filterButtons.forEach(button => {
+    button.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const status = button.dataset.status;
+        const response = await fetch(`{{ url_for('api.api_tarefas') }}?status=${status}`);
+        if (!response.ok) return;
+        const tarefas = await response.json();
+        tarefasLista.innerHTML = tarefas.length ? tarefas.map(t => `
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title"><i class="bi bi-card-checklist"></i> ${t.titulo}</h5>
+                            <span class="badge bg-${t.status === 'pendente' ? 'warning' : t.status === 'em andamento' ? 'info' : 'success'}">${t.status.charAt(0).toUpperCase() + t.status.slice(1)}</span>
+                        </div>
+                        <p class="card-text">${t.descricao}</p>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{{ url_for('tasks.editar', id=0) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-square"></i> Editar</a>
+                                <form method="post" action="{{ url_for('tasks.excluir', id=0) }}" class="d-inline" onsubmit="return confirm('Excluir esta tarefa?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Excluir</button>
+                                </form>
+                            </div>
+                            <span class="text-muted">ID ${t.id}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('') : '<div class="col-12"><div class="alert alert-secondary">Nenhuma tarefa encontrada para o filtro selecionado.</div></div>';
+        tarefasLista.querySelectorAll('a[href*="/editar"], form[action*="/excluir"]').forEach((el, i) => {
+            const tarefa = tarefas[i];
+            if (!tarefa) return;
+            if (el.tagName === 'A') {
+                el.href = `{{ url_for('tasks.editar', id=0) }}`.replace('/0', `/${tarefa.id}`);
+            } else if (el.tagName === 'FORM') {
+                el.action = `{{ url_for('tasks.excluir', id=0) }}`.replace('/0', `/${tarefa.id}`);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

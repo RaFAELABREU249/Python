@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Progresso - Controle de Tarefas{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-4"><i class="bi bi-bar-chart-line-fill"></i> Progresso das tarefas</h4>
+                <canvas id="progressoChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function carregarProgresso() {
+    const response = await fetch('{{ url_for('api.api_progresso') }}');
+    if (!response.ok) {
+        return;
+    }
+    const dados = await response.json();
+    const labels = Object.keys(dados).map(s => s.charAt(0).toUpperCase() + s.slice(1));
+    const valores = Object.values(dados);
+    const ctx = document.getElementById('progressoChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Tarefas por status',
+                data: valores,
+                backgroundColor: ['#ffc107', '#0dcaf0', '#198754'],
+                borderColor: ['#e0a800', '#31d2f2', '#146c43'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+carregarProgresso();
+</script>
+{% endblock %}

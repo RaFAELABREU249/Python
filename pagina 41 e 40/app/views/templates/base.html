@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Controle de Tarefas{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-..." crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('tasks.dashboard') }}"><i class="bi bi-kanban-fill"></i> Tarefas</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if session.get('user_id') %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('tasks.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('tasks.nova_tarefa') }}"><i class="bi bi-plus-circle"></i> Nova tarefa</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('tasks.progresso') }}"><i class="bi bi-bar-chart-line-fill"></i> Progresso</a></li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                {% if session.get('user_id') %}
+                <li class="nav-item"><span class="nav-link disabled"><i class="bi bi-person-circle"></i> {{ session.get('username') }}</span></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.registro') }}"><i class="bi bi-person-plus"></i> Registro</a></li>
+                {% endif %}
+                <li class="nav-item">
+                    <button class="btn btn-outline-light ms-2" id="theme-toggle"><i class="bi bi-moon-stars"></i></button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const themeToggle = document.getElementById('theme-toggle');
+const html = document.documentElement;
+const currentTheme = localStorage.getItem('theme') || 'light';
+html.dataset.theme = currentTheme;
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const newTheme = html.dataset.theme === 'light' ? 'dark' : 'light';
+        html.dataset.theme = newTheme;
+        localStorage.setItem('theme', newTheme);
+    });
+}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
